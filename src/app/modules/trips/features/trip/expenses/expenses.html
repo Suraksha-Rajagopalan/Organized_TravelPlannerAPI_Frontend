@@ -1,0 +1,97 @@
+<div *ngIf="expenseForm" class="container mt-4">
+  <form
+    [formGroup]="expenseForm"
+    (ngSubmit)="addExpense()"
+    class="row g-3 border p-4 rounded shadow-sm bg-light"
+  >
+    <div class="col-md-6">
+      <label class="form-label">Category:</label>
+      <select formControlName="category" class="form-select" required>
+        <option value="" disabled selected>Select category</option>
+        <option value="Food">Food</option>
+        <option value="Travel">Travel</option>
+        <option value="Stay">Stay</option>
+        <option value="Miscellaneous">Miscellaneous</option>
+      </select>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Description:</label>
+      <input type="text" formControlName="description" class="form-control" />
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Amount:</label>
+      <input
+        type="number"
+        formControlName="amount"
+        class="form-control"
+        required
+        min="0.01"
+      />
+    </div>
+
+    <div class="mb-4">
+      <label for="dateTime" class="form-label fw-semibold">Date & Time</label>
+      <input
+        type="datetime-local"
+        id="dateTime"
+        formControlName="date"
+        class="form-control"
+      />
+      <div
+        *ngIf="
+          expenseForm.get('date')?.touched && expenseForm.get('date')?.invalid
+        "
+        class="text-danger mt-1"
+      >
+        Invalid date format
+      </div>
+    </div>
+
+    <div class="col-12 text-end">
+      <button>Add Expense</button>
+    </div>
+  </form>
+</div>
+
+<hr class="my-4" />
+
+<div *ngIf="expenses.length > 0" class="container">
+  <h3 class="mb-3">Expenses</h3>
+  <ul class="list-group mb-3">
+    <li
+      *ngFor="let expense of expenses"
+      class="list-group-item d-flex justify-content-between align-items-center"
+    >
+      <div>
+        <strong>{{ expense.date | date : "dd-MMM-yyyy, h:mm a" }}</strong> -
+        {{ expense.category }}: ₹{{ expense.amount }}
+      </div>
+      <div *ngIf="expense.description">
+        <small class="text-muted">Description: {{ expense.description }}</small>
+      </div>
+      <button
+        class="btn btn-sm btn-secondary"
+        (click)="editExpense(expense)"
+      >
+        Edit
+      </button>
+      <button
+        class="btn btn-sm btn-danger"
+        (click)="deleteExpense(expense.id)"
+      >
+        Delete
+      </button>
+    </li>
+  </ul>
+
+  <h4>Summary:</h4>
+  <ul class="list-group mb-3">
+    <li *ngFor="let item of summary" class="list-group-item">
+      {{ item.category }}: ₹{{ item.total }}
+    </li>
+  </ul>
+
+  <h4 class="fw-bold">Total: ₹{{ total }}</h4>
+</div>

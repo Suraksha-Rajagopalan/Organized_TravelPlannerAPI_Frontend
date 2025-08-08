@@ -1,0 +1,40 @@
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.rating-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.rating-label {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.stars {
+  display: flex;
+  gap: 8px;
+}
+
+.star {
+  font-size: 32px;
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.star.selected {
+  color: #FFD700; 
+}
+
+.review-box {
+  width: 100%;
+}
+
+mat-dialog-actions {
+  margin-top: 16px;
+}

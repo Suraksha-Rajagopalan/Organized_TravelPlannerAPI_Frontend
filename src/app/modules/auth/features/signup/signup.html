@@ -1,0 +1,52 @@
+<div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
+  <div class="card p-4 shadow rounded" style="min-width: 350px; max-width: 500px; width: 100%;">
+    <h3 class="text-center mb-3">Sign Up</h3>
+
+    <form [formGroup]="signupForm" (ngSubmit)="onSignup()">
+      <div class="mb-3">
+        <input
+          type="text"
+          formControlName="name"
+          placeholder="Name"
+          class="form-control"
+        />
+      </div>
+
+      <div class="mb-3">
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="Email"
+          class="form-control"
+        />
+      </div>
+
+      <div class="mb-3">
+        <input
+          type="password"
+          formControlName="password"
+          placeholder="Password"
+          class="form-control"
+        />
+        <ul class="text-danger mt-2 small ps-3 mb-0">
+          <li [class.text-success]="passwordHasMinLength">At least 6 characters</li>
+          <li [class.text-success]="passwordHasNumber">At least one number</li>
+          <li [class.text-success]="passwordHasUppercase">At least one uppercase letter</li>
+        </ul>
+      </div>
+
+      <div *ngIf="message" class="mt-2">
+        <p [ngClass]="{ 'text-danger': isError, 'text-success': !isError }">{{ message }}</p>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100" [disabled]="signupForm.invalid">
+        Sign Up
+      </button>
+
+      <p class="text-center mt-3">
+        Already have an account?
+        <a routerLink="/auth/login" class="text-decoration-underline text-primary">Login</a>
+      </p>
+    </form>
+  </div>
+</div>

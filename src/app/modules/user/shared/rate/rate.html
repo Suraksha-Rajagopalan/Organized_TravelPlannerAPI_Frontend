@@ -1,0 +1,23 @@
+<mat-dialog-content class="dialog-content">
+  <h2>Rate this Trip</h2>
+
+  <div class="star-rating">
+    <mat-icon
+      *ngFor="let star of [1, 2, 3, 4, 5]"
+      (click)="selectRating(star)"
+      [ngClass]="{ 'selected': star <= rating }"
+    >
+      {{ star <= rating ? 'star' : 'star_border' }}
+    </mat-icon>
+  </div>
+
+  <mat-form-field appearance="outline" class="review-box" floatLabel="always">
+    <mat-label>Review</mat-label>
+    <textarea matInput [(ngModel)]="reviewText" rows="4" placeholder="Write your thoughts..."></textarea>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button color="accent" (click)="onCancel()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="rating === 0">Submit</button>
+</mat-dialog-actions>

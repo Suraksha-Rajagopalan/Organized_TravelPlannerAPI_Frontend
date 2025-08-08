@@ -1,0 +1,43 @@
+<nav class="navbar navbar-expand-lg custom-navbar shadow-sm px-4 py-2">
+  <a class="navbar-brand d-flex align-items-center" routerLink="/dashboard">
+    <div class="logo-bg me-2"></div>
+    <span class="fw-bold fs-4 text-dark">Travel Planner</span>
+  </a>
+
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+    <!-- Left-side navigation links -->
+    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+      <ng-container *ngIf="user.role !== 'Admin'">
+        <li class="nav-item">
+          <a class="nav-link fw-semibold text-dark" (click)="goToHome()">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-semibold text-dark" (click)="TripCreation()">Create Trip</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-semibold text-dark" (click)="goToTripReviews()">Trip Reviews</a>
+        </li>
+      </ng-container>
+      <li *ngIf="user.role == 'Admin'" class="nav-item">
+        <a class="nav-link fw-semibold text-dark" (click)="goToAdmin()">Admin Page</a>
+      </li>
+    </ul>
+
+    <!-- Right-side user actions -->
+    <div class="d-flex align-items-center">
+      <ng-container *ngIf="isLoggedIn; else loginButton">
+        <span class="me-3 text-dark fw-semibold">Welcome, {{ username }}</span>
+        <button class="btn btn-outline-primary me-2" (click)="ViewProfile()">Profile</button>
+        <button class="btn btn-outline-danger" (click)="logout()">Logout</button>
+      </ng-container>
+      <ng-template #loginButton>
+        <button class="btn btn-success" (click)="onLoginButtonClick()">Login</button>
+      </ng-template>
+    </div>
+  </div>
+</nav>

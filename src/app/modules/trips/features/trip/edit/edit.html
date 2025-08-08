@@ -1,0 +1,134 @@
+<div class="container mt-4" *ngIf="tripForm">
+  <h2>Edit Trip</h2>
+  <form [formGroup]="tripForm" (ngSubmit)="onSubmit()">
+    <div class="mb-3">
+      <label>Title</label>
+      <input class="form-control" formControlName="title" />
+    </div>
+
+    <div class="mb-3">
+      <label>Destination</label>
+      <input class="form-control" formControlName="destination" />
+    </div>
+
+    <div class="mb-3">
+      <label>Start Date</label>
+      <input class="form-control" type="date" formControlName="startDate" />
+    </div>
+
+    <div class="mb-3">
+      <label>End Date</label>
+      <input class="form-control" type="date" formControlName="endDate" />
+    </div>
+
+    <div class="mb-3">
+      <label>Budget</label>
+      <input type="number" class="form-control" formControlName="budget" />
+    </div>
+
+    <div class="mb-3">
+      <label>Travel Mode</label>
+      <input class="form-control" formControlName="travelMode" />
+    </div>
+
+    <div class="mb-3">
+      <label>Notes</label>
+      <textarea class="form-control" formControlName="notes"></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label>Duration (days)</label>
+      <input type="number" class="form-control" formControlName="duration" />
+    </div>
+
+    <div class="mb-3">
+      <label>Best Time to Visit</label>
+      <input class="form-control" formControlName="bestTime" />
+    </div>
+
+    <div class="mb-3">
+      <label>Image URL</label>
+      <input class="form-control" formControlName="image" />
+    </div>
+
+    <div class="mb-3">
+      <label>Description</label>
+      <textarea class="form-control" formControlName="description"></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label>Essentials</label>
+      <div
+        *ngFor="let item of tripForm.get('essentials')?.value; let i = index"
+        class="d-flex mb-2"
+      >
+        <input
+          type="text"
+          class="form-control me-2"
+          [value]="item"
+          (input)="onEssentialChange($event, i)"
+        />
+        <button
+          class="btn btn-danger"
+          type="button"
+          (click)="removeEssential(i)"
+        >
+          Remove
+        </button>
+      </div>
+      <button
+        type="button"
+        class="btn btn-outline-primary btn-sm"
+        (click)="addEssential()"
+      >
+        Add Essential
+      </button>
+    </div>
+
+    <div class="mb-3">
+      <label>Tourist Spots</label>
+      <div
+        *ngFor="let spot of tripForm.get('touristSpots')?.value; let i = index"
+        class="d-flex mb-2"
+      >
+        <input
+          type="text"
+          class="form-control me-2"
+          [value]="spot"
+          (input)="onTouristSpotChange($event, i)"
+        />
+        <button
+          class="btn btn-danger"
+          type="button"
+          (click)="removeTouristSpot(i)"
+        >
+          Remove
+        </button>
+      </div>
+      <button
+        type="button"
+        class="btn btn-outline-primary btn-sm"
+        (click)="addTouristSpot()"
+      >
+        Add Tourist Spot
+      </button>
+    </div>
+
+    <div formGroupName="budgetDetails">
+      <div class="mb-3">
+        <label>Food Budget</label>
+        <input type="number" class="form-control" formControlName="food" />
+      </div>
+
+      <div class="mb-3">
+        <label>Hotel Budget</label>
+        <input type="number" class="form-control" formControlName="hotel" />
+      </div>
+    </div>
+
+    <button class="btn btn-success me-2" type="submit">Save</button>
+    <button class="btn btn-secondary" type="button" (click)="onCancel()">
+      Cancel
+    </button>
+  </form>
+</div>

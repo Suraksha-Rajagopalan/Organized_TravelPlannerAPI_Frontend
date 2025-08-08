@@ -1,0 +1,34 @@
+<div class="container mt-5">
+  <h2>Share Trip</h2>
+  <form [formGroup]="shareForm" (ngSubmit)="shareTrip()">
+    <div class="mb-3">
+      <label for="sharedWithEmail" class="form-label">Recipient Email</label>
+      <input
+        type="email"
+        id="sharedWithEmail"
+        class="form-control"
+        formControlName="sharedWithEmail"
+        [class.is-invalid]="shareForm.get('sharedWithEmail')?.invalid && shareForm.get('sharedWithEmail')?.touched"
+      />
+      <div *ngIf="shareForm.get('sharedWithEmail')?.invalid && shareForm.get('sharedWithEmail')?.touched" class="text-danger">
+        Please enter a valid email.
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="accessLevel" class="form-label">Access Level</label>
+      <select id="accessLevel" class="form-select" formControlName="accessLevel">
+        <option value="View">View</option>
+        <option value="Edit">Edit</option>
+      </select>
+    </div>
+
+    <button
+      type="submit"
+      class="btn btn-primary w-100"
+      [disabled]="shareForm.invalid || submitting"
+    >
+      {{ submitting ? 'Sharing...' : 'Share Trip' }}
+    </button>
+  </form>
+</div>

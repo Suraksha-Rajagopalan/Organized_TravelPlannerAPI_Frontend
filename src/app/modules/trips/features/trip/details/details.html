@@ -1,0 +1,109 @@
+<!-- Error message -->
+<div *ngIf="errorMessage" class="alert alert-danger text-center">
+  {{ errorMessage }}
+</div>
+
+<!-- Main content: show when `trip` is defined -->
+<ng-container *ngIf="trip; else noTripSelected">
+  <div class="trip-details container py-4">
+
+    <!-- Image -->
+    <div class="row mb-4" *ngIf="trip?.image">
+      <div class="col-12">
+        <img
+          [src]="trip?.image"
+          [alt]="trip?.title || 'Trip image'"
+          class="img-fluid rounded shadow-sm"
+          style="max-height: 300px; object-fit: cover; width: 100%"
+        />
+      </div>
+    </div>
+
+    <!-- Title & Description -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <h2 class="fw-bold">{{ trip?.title }}</h2>
+        <p *ngIf="trip?.description; else noDescription">{{ trip?.description }}</p>
+        <ng-template #noDescription>
+          <p class="text-muted fst-italic">No description provided.</p>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Basic Info -->
+    <div class="row mb-4">
+      <div class="col-md-4 mb-3">
+        <h5 class="fw-semibold">Location</h5>
+        <p class="mb-0">{{ trip?.destination }}</p>
+      </div>
+      <div class="col-md-4 mb-3" *ngIf="trip?.duration">
+        <h5 class="fw-semibold">Duration</h5>
+        <p class="mb-0">{{ trip?.duration }}</p>
+      </div>
+      <div class="col-md-4 mb-3" *ngIf="trip?.bestTime">
+        <h5 class="fw-semibold">Best Time</h5>
+        <p class="mb-0">{{ trip?.bestTime }}</p>
+      </div>
+    </div>
+
+    <!-- Essentials -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <h4>Essentials</h4>
+        <ul *ngIf="trip?.essentials?.length; else noEssentials" class="list-group list-group-flush">
+          <li *ngFor="let item of trip?.essentials" class="list-group-item px-0">
+            <i class="bi bi-check-circle-fill text-success me-2"></i> {{ item }}
+          </li>
+        </ul>
+        <ng-template #noEssentials>
+          <p class="text-muted fst-italic">No essentials listed.</p>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Tourist Spots -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <h4>Tourist Spots</h4>
+        <ul *ngIf="trip?.touristSpots?.length; else noSpots" class="list-group list-group-flush">
+          <li *ngFor="let spot of trip?.touristSpots" class="list-group-item px-0">
+            <i class="bi bi-geo-alt-fill text-primary me-2"></i> {{ spot }}
+          </li>
+        </ul>
+        <ng-template #noSpots>
+          <p class="text-muted fst-italic">No tourist spots listed.</p>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Budget -->
+    <div class="row mb-4" *ngIf="trip?.budgetDetails">
+      <div class="col-md-6 mb-3">
+        <h4>Budget</h4>
+        <p><strong>Food:</strong> ₹{{ trip?.budgetDetails?.food || 'NA' }}</p>
+      </div>
+      <div class="col-md-6 mb-3">
+        <h4 class="invisible">Budget</h4>
+        <p><strong>Hotel:</strong> ₹{{ trip?.budgetDetails?.hotel || 'NA' }}</p>
+      </div>
+    </div>
+
+    <!-- Add to My Trips -->
+    <div class="row mb-4" *ngIf="!isAdded && !readOnly">
+      <div class="col-12 text-end">
+        <button class="btn btn-outline-primary shadow-sm" (click)="addToMyTrips()">
+          <i class="bi bi-bookmark-plus"></i>
+          Add to My Trips
+        </button>
+      </div>
+    </div>
+
+  </div>
+</ng-container>
+
+<!-- Fallback when no `trip` and no `errorMessage` -->
+<ng-template #noTripSelected>
+  <div class="container py-4 text-center text-muted fst-italic">
+    Please select a trip to see details.
+  </div>
+</ng-template>

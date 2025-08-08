@@ -1,0 +1,43 @@
+<div class="app-overlay">
+  <app-navbar></app-navbar>
+  <div class="page-content">
+    <!-- Main Content -->
+    <div class="container my-4">
+      <!-- My Trips -->
+      <h2 class="text-secondary fw-bold mb-3">My Trips</h2>
+
+      <div *ngIf="loading" class="text-center my-3">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <div *ngIf="!loading && errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+
+      <div *ngIf="!loading && !errorMessage && trips.length === 0" class="alert alert-info">
+        No trips added yet.
+      </div>
+
+      <div *ngIf="!loading && !errorMessage && trips.length > 0" class="my-4">
+        <app-trip-list [trips]="trips" (tripSelected)="myTripSelected($event)"></app-trip-list>
+      </div>
+
+      <!-- Shared Trips Section -->
+      <h2 class="text-secondary fw-bold mt-5">Trips Shared With Me</h2>
+
+      <div *ngIf="sharedTrips.length === 0" class="alert alert-info">
+        No trips have been shared with you.
+      </div>
+
+      <div *ngIf="sharedTrips.length > 0" class="my-4">
+        <app-trip-list [trips]="sharedTrips" (tripSelected)="myTripSelected($event)"></app-trip-list>
+      </div>
+
+      <!-- Suggested Trips Carousel -->
+      <div class="my-5">
+        <app-sample-trips (tripSelected)="onTripSelected($event)"></app-sample-trips>
+      </div>
+    </div>
+  </div>

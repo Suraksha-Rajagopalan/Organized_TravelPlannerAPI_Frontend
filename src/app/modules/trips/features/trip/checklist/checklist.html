@@ -1,0 +1,79 @@
+<div class="container mt-4">
+  <h4>Trip Checklist</h4>
+
+  <!-- Input to Add New Item -->
+  <div class="mb-3 d-flex">
+    <input
+      [(ngModel)]="newItemText"
+      class="form-control me-2"
+      placeholder="Add checklist item..."
+    />
+    <button class="btn btn-primary" (click)="addItem()">Add</button>
+  </div>
+
+  <!-- Checklist Items -->
+  <ul class="list-group" *ngIf="checklist && checklist.length">
+    <li
+      *ngFor="let item of checklist"
+      class="list-group-item d-flex justify-content-between align-items-center"
+    >
+      <div class="d-flex align-items-center w-100">
+        <!-- Checkbox to mark complete -->
+        <input
+          type="checkbox"
+          class="form-check-input me-2"
+          [checked]="item.isCompleted"
+          (change)="toggleComplete(item)"
+        />
+
+        <!-- Display or Edit Item Text -->
+        <div class="flex-grow-1">
+          <span
+            *ngIf="editingItemId !== item.id"
+            [ngClass]="{ 'text-decoration-line-through': item.isCompleted }"
+          >
+            {{ item.description }}
+          </span>
+
+          <input
+            *ngIf="editingItemId === item.id"
+            [(ngModel)]="editedText"
+            class="form-control"
+          />
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="ms-2">
+          <button
+            *ngIf="editingItemId !== item.id"
+            class="btn btn-sm btn-secondary me-1"
+            (click)="startEdit(item)"
+          >
+            Edit
+          </button>
+
+          <!-- Save & Cancel -->
+          <button
+            *ngIf="editingItemId === item.id"
+            class="btn btn-sm btn-success me-1"
+            (click)="saveEdit(item)"
+          >
+            Save
+          </button>
+          <button
+            *ngIf="editingItemId === item.id"
+            class="btn btn-sm btn-warning me-1"
+            (click)="cancelEdit()"
+          >
+            Cancel
+          </button>
+
+          <!-- Delete -->
+          <button class="btn btn-sm btn-danger" (click)="deleteItem(item)">
+            Delete
+          </button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>

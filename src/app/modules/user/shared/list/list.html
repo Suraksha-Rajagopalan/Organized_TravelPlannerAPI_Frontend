@@ -1,0 +1,99 @@
+<div class="row">
+  <div *ngFor="let trip of displayedTrips" class="col-md-4 mb-4 d-flex">
+    <div class="card flex-fill position-relative">
+      <!-- Top-right Share Button - Only show if user is the owner -->
+      <button
+        *ngIf="trip.isOwner"
+        class="btn btn-sm btn-secondary position-absolute top-0 end-0 m-2"
+        (click)="shareTrip(trip)"
+      >
+        <i class="bi bi-share-fill"></i>
+      </button>
+
+      <div class="card-body">
+        <h5 class="card-title">{{ trip.title }}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">{{ trip.destination }}</h6>
+        <p class="card-text">Budget: ₹{{ trip.budget }}</p>
+        <p class="card-text">
+          Dates: {{ trip.startDate | date : "mediumDate" }} to
+          {{ trip.endDate | date : "mediumDate" }}
+        </p>
+        <p class="card-text">{{ trip.notes }}</p>
+
+        <button
+          class="btn btn-outline-warning btn-sm me-2 mt-3"
+          (click)="selectViewTrip(trip.id)"
+        >
+          View
+        </button>
+        <button
+          *ngIf="trip.isOwner || trip.accessLevel === 'Edit'"
+          class="btn btn-outline-primary btn-sm me-2 mt-3"
+          (click)="selectEditTrip(trip.id)"
+        >
+          Edit
+        </button>
+
+        <button
+          class="btn btn-outline-success btn-sm me-2 mt-3"
+          (click)="goToItinerary(trip)"
+        >
+          Itinerary
+        </button>
+
+        <button
+          class="btn btn-outline-dark btn-sm mt-3"
+          (click)="goToChecklist(trip)"
+        >
+          Checklist
+        </button>
+
+        <button
+          *ngIf="trip.isOwner"
+          class="btn btn-outline-danger btn-sm me-2 mt-3"
+          (click)="deleteTrip(trip)"
+        >
+          Delete
+        </button>
+
+        <button
+          class="btn btn-outline-secondary btn-sm me-2 mt-3"
+          (click)="getExpensesLink(trip)"
+        >
+          Track Budget
+        </button>
+
+        <!-- Rating button -->
+        <button
+          *ngIf="
+            (!trip.review?.rating || trip.review?.rating === 0) && trip.isOwner
+          "
+          class="btn btn-outline-info btn-sm me-2 mt-3"
+          (click)="openRatingModal(trip)"
+        >
+          Rate
+        </button>
+
+        <!-- Stars and review -->
+        <div
+          *ngIf="trip.review?.rating"
+          class="mt-2"
+        >
+          <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
+            <i
+              class="bi"
+              [ngClass]="
+                star <= (trip.review?.rating || 0)
+                  ? 'bi-star-fill text-warning'
+                  : 'bi-star text-muted'
+              "
+            ></i>
+          </ng-container>
+          <div *ngIf="trip.review?.review" class="mt-1 fst-italic">
+            "{{ trip.review?.review }}"
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

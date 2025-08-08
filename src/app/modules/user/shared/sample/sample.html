@@ -1,0 +1,22 @@
+<div class="d-flex justify-content-between align-items-center my-3">
+  <h3 class="fw-bold">Popular Trips</h3>
+  <div>
+    <button class="btn btn-outline-secondary me-2" (click)="scrollLeft()">‹</button>
+    <button class="btn btn-outline-secondary" (click)="scrollRight()">›</button>
+  </div>
+</div>
+
+<div #carousel class="d-flex overflow-auto pb-2">
+  <div
+    *ngFor="let trip of sampleTrips"
+    class="card mx-2"
+    style="min-width: 250px; max-width: 250px; cursor: pointer"
+    (click)="onTripClick(trip)"
+  >
+    <img [src]="trip.image" class="card-img-top" [alt]="trip.title" />
+    <div class="card-body">
+      <h5 class="card-title">{{ trip.title }}</h5>
+      <p class="text-muted">{{ trip.destination }}</p>
+    </div>
+  </div>
+</div>

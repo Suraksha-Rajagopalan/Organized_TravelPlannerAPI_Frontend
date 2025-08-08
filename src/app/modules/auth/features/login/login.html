@@ -1,0 +1,26 @@
+<div class="auth-container">
+  <h2>Login</h2>
+  <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+    <input
+      type="email"
+      formControlName="email"
+      placeholder="Email"
+    />
+    <div *ngIf="emailError" class="error-message">{{ emailError }}</div>
+
+    <input
+      type="password"
+      formControlName="password"
+      placeholder="Password"
+    />
+    <div *ngIf="passwordError" class="error-message">{{ passwordError }}</div>
+
+    <button type="submit">Login</button>
+    <p class="switch-link">
+      Don't have an account?
+      <a routerLink="/auth/signup" style="color: blue; text-decoration: underline;">
+        Sign up
+      </a>
+    </p>
+  </form>
+</div>

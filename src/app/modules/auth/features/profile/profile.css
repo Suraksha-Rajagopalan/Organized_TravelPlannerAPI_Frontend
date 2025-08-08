@@ -1,0 +1,10 @@
+.profile-img {
+  width: 120px;             /* Desired width */
+  height: 120px;            /* Desired height */
+  border-radius: 50%;       /* Makes it circular */
+  object-fit: cover;        /* Ensures image fills the area neatly */
+  border: 2px solid #ccc;   /* Optional border */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional shadow */
+  display: block;
+  margin: 20px auto;        /* Center it */
+}

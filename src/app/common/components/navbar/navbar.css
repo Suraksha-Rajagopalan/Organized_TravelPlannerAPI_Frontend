@@ -1,0 +1,30 @@
+.custom-navbar {
+  background-color: #9eeaf9;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  border-bottom: 1px solid #d0d0d0;
+}
+
+.logo-bg {
+  width: 40px;
+  height: 40px;
+  background-image: url('https://cdn-icons-png.flaticon.com/512/8170/8170984.png');
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
+}
+
+.nav-link {
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-link:hover {
+  color: #0d6efd !important;
+  text-decoration: underline;
+}
+
+.btn {
+  min-width: 90px;
+}
