@@ -48,11 +48,25 @@ export class List implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['trips'] && this.trips?.length) {
-      this.displayedTrips = this.trips.map(trip => ({
-        ...trip,
-        isOwner: trip.userId === this.userId
-      }));
+      // Normalize ID so shared trips also have `id`
+      this.displayedTrips = this.trips.map(trip => {
+        const normalizedId =
+          (trip as any).id ??
+          (trip as any).tripId ??
+          (trip as any).TripId ??
+          null;
+        return {
+          ...trip,
+          id: normalizedId,
+          isOwner: trip.userId === this.userId
+        } as TripWithOwnership;
+      });
+
+      console.debug('Normalized displayedTrips:', this.displayedTrips);
+
       this.loadReviewsForTrips();
+    } else if (changes['trips']) {
+      this.displayedTrips = [];
     }
   }
 
@@ -79,15 +93,27 @@ export class List implements OnChanges {
     });
   }
 
-  selectViewTrip(tripId: number): void {
+  selectViewTrip(tripId: number | null): void {
+    if (tripId == null) {
+      console.error('View trip failed — missing tripId');
+      return;
+    }
     this.router.navigate(['/trip/details', tripId]);
   }
 
-  selectEditTrip(tripId: number): void {
+  selectEditTrip(tripId: number | null): void {
+    if (tripId == null) {
+      console.error('Edit trip failed — missing tripId');
+      return;
+    }
     this.router.navigate(['/trip/edit', tripId]);
   }
 
   shareTrip(trip: TripWithOwnership): void {
+    if (trip.id == null) {
+      console.error('Share trip failed — missing tripId');
+      return;
+    }
     this.router.navigate(['/trip/share', trip.id], { state: { trip } });
   }
 
@@ -138,21 +164,33 @@ export class List implements OnChanges {
         };
 
         this.rateService.submitRatingAndReview(payload).subscribe(() => {
-          trip.review = payload; // Now review is the full ReviewDto
+          trip.review = payload;
         });
       }
     });
   }
 
   goToChecklist(trip: TripWithOwnership): void {
+    if (trip.id == null) {
+      console.error('Checklist navigation failed — missing tripId');
+      return;
+    }
     this.router.navigate(['/trip', trip.id, 'checklist']);
   }
 
   getExpensesLink(trip: TripWithOwnership): void {
+    if (trip.id == null) {
+      console.error('Expenses navigation failed — missing tripId');
+      return;
+    }
     this.router.navigate(['/trip', trip.id, 'expenses']);
   }
 
   goToItinerary(trip: TripWithOwnership): void {
+    if (trip.id == null) {
+      console.error('Itinerary navigation failed — missing tripId');
+      return;
+    }
     this.router.navigate(['/trip', trip.id, 'itinerary']);
   }
 }
