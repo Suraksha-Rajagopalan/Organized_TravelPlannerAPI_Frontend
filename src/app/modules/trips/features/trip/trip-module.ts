@@ -10,6 +10,7 @@ import { Expenses } from './expenses/expenses';
 import { Itinerary } from './itinerary/itinerary';
 import { Share } from './share/share';
 import { Checklist } from './checklist/checklist';
+import { Popup } from "../../../../common/components/popup/popup";
 
 
 @NgModule({
@@ -26,7 +27,8 @@ import { Checklist } from './checklist/checklist';
     CommonModule,
     TripRoutingModule,
     FormsModule,
-    ReactiveFormsModule
-  ]
+    ReactiveFormsModule,
+    Popup
+]
 })
 export class TripModule { }

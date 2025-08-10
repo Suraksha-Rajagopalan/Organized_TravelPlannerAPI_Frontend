@@ -19,6 +19,8 @@ import { TripService } from '../../../../common/services/trip.service';
 import { AuthService } from '../../../../common/services/auth.service';
 import { RateService } from '../../../../common/services/rate.service';
 import { Rate } from '../rate/rate';
+import { Observable, of } from 'rxjs';
+import { map, tap, catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-trip-list',
@@ -35,6 +37,7 @@ export class List implements OnChanges {
   selectedTrip: TripDto | null = null;
   userId: number;
   tripAccess: TripWithAccessDto[] = [];
+  trip: TripDto[] = [];
 
   constructor(
     private tripService: TripService,
@@ -76,21 +79,37 @@ export class List implements OnChanges {
     }
   }
 
-  private loadReviewsForTrips(): void {
-    this.displayedTrips.forEach(trip => {
-      if (trip.id != null) {
-        this.rateService.getReview(trip.id).subscribe({
-          next: (review: ReviewDto | null) => {
-            trip.review = review ?? null;
-          },
-          error: () => {
+  private loadReviewsForTrips(): Observable<TripDto[]> {
+    return this.tripService.getTrips().pipe(
+      map(trips =>
+        trips.map(trip => {
+          // Normalize review: if there's no useful data, set to null
+          const r: ReviewDto | null | undefined = trip.review;
+
+          if (!r) {
             trip.review = null;
+            return trip;
           }
-        });
-      } else {
-        trip.review = null;
-      }
-    });
+
+          // If review object exists but has neither rating nor text, treat as null
+          const hasRating = typeof r.rating === 'number' && !isNaN(r.rating);
+          const hasText = typeof r.review === 'string' && r.review.trim().length > 0;
+
+          trip.review = (hasRating || hasText) ? r : null;
+          return trip;
+        })
+      ),
+      tap(trips => {
+        // update local view-model so template can bind
+        this.displayedTrips = trips;
+      }),
+      catchError(err => {
+        console.error('loadReviewsForTrips failed:', err);
+        // on error, clear displayedTrips and return empty array so subscribers get a value
+        this.displayedTrips = [];
+        return of([] as TripDto[]);
+      })
+    );
   }
 
   selectViewTrip(tripId: number | null): void {

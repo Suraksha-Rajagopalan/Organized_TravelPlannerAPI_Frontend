@@ -1,5 +1,6 @@
 <div class="container mt-4">
   <h4>Trip Checklist</h4>
+  <app-popup *ngIf="popupVisible" [message]="popupMessage"></app-popup>
 
   <!-- Input to Add New Item -->
   <div class="mb-3 d-flex">
