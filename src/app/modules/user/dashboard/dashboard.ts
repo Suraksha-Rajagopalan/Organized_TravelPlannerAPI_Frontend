@@ -20,7 +20,7 @@ export class Dashboard implements OnInit, OnDestroy {
   // My Trips (paginated)
   trips: TripDto[] = [];
   pageNumber: number = 1;
-  pageSize: number = 3;
+  pageSize: number = 6;
   totalPages: number = 0;
 
   // Shared Trips
@@ -45,36 +45,42 @@ export class Dashboard implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.authService.user$.subscribe(user => {
       this.currentUser = user;
-      console.log('Current User:', user);
-
       if (user) {
         this.username = user.username;
         this.isLoggedIn = true;
-
-        // Load user's own trips
-        this.tripService.getTrips().subscribe({
-          next: (trips) => {
-            console.log(trips);
-            this.trips = trips;
-            this.loading = false;
-          },
-          error: () => {
-            this.errorMessage = 'Failed to load trips. Please try again later.';
-            this.loading = false;
-          }
-        });
-
-        // Load shared trips
-        this.shareService.getSharedTrips().subscribe({
-          next: (shared: TripDto[]) => {
-            this.sharedTrips = shared;
-          },
-          error: () => {
-            console.error("Failed to load shared trips");
-          }
-        });
+        this.loadMyTrips();
       }
     });
+  }
+
+  loadMyTrips(): void {
+    this.loading = true;
+    this.tripService.getPaginatedTrips(this.pageNumber, this.pageSize)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          this.trips = res.items
+            .slice() // copy to avoid mutating original
+            .sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }));
+
+          this.totalPages = res.totalPages ?? 0;
+          this.loading = false;
+        },
+        error: () => {
+          this.errorMessage = 'Failed to load trips.';
+          this.loading = false;
+        }
+      });
+  }
+
+
+
+  // For pagination buttons
+  onMyTripsPageChange(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.pageNumber = page;
+      this.loadMyTrips();
+    }
   }
 
   ngOnDestroy(): void {

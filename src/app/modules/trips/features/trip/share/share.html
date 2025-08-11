@@ -1,5 +1,6 @@
 <div class="container mt-5">
   <h2>Share Trip</h2>
+  <ng-container #toastContainer></ng-container>
   <form [formGroup]="shareForm" (ngSubmit)="shareTrip()">
     <div class="mb-3">
       <label for="sharedWithEmail" class="form-label">Recipient Email</label>

@@ -1,4 +1,6 @@
 <div *ngIf="expenseForm" class="container mt-4">
+  <h4>Budget Tracker</h4>
+  <ng-container #toastContainer></ng-container>
   <form
     [formGroup]="expenseForm"
     (ngSubmit)="addExpense()"
@@ -71,16 +73,10 @@
       <div *ngIf="expense.description">
         <small class="text-muted">Description: {{ expense.description }}</small>
       </div>
-      <button
-        class="btn btn-sm btn-secondary"
-        (click)="editExpense(expense)"
-      >
+      <button class="btn btn-sm btn-secondary" (click)="editExpense(expense)">
         Edit
       </button>
-      <button
-        class="btn btn-sm btn-danger"
-        (click)="deleteExpense(expense.id)"
-      >
+      <button class="btn btn-sm btn-danger" (click)="deleteExpense(expense.id)">
         Delete
       </button>
     </li>

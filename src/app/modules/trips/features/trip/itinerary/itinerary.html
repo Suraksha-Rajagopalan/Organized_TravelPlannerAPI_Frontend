@@ -1,6 +1,7 @@
 <div class="container my-5">
   <div class="card shadow-lg rounded-4 p-4">
     <h2 class="mb-4 text-center fw-bold">Trip Itinerary</h2>
+     <ng-container #toastContainer></ng-container>
 
     <form [formGroup]="formGroup" (ngSubmit)="addItineraryItem()">
       <div class="mb-3">

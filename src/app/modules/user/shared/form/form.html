@@ -1,4 +1,5 @@
 <form (ngSubmit)="onSubmit()" #tripForm="ngForm" class="p-4 border rounded shadow-sm bg-light">
+  <ng-container #toastContainer></ng-container>
   <div class="row g-3">
     <div class="col-md-6">
       <label class="form-label fw-semibold">Title <span class="text-danger">*</span></label>

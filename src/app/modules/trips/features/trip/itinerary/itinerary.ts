@@ -5,6 +5,7 @@ import { ItineraryService } from '../../../../../common/services/itinerary.servi
 import { TripService } from '../../../../../common/services/trip.service';
 import { AuthService } from '../../../../../common/services/auth.service';
 import { ItineraryItemCreateDto } from '../../../../../common/DTOs/Itinerary/ItineraryItemCreateDto';
+import { TripDto } from '../../../../../common/DTOs/Trip/TripDto';
 import { Popup } from '../../../../../common/components/popup/popup';
 
 @Component({
@@ -15,11 +16,17 @@ import { Popup } from '../../../../../common/components/popup/popup';
 })
 export class Itinerary implements OnInit {
   private authService = inject(AuthService);
+  private tripService = inject(TripService);
+
   @ViewChild('toastContainer', { read: ViewContainerRef }) toastContainer!: ViewContainerRef;
 
   tripId!: number;
   userId!: number;
   itinerary: ItineraryItemCreateDto[] = [];
+
+  isOwner: boolean = false;
+  hasEditAccess: boolean = false;
+  accessChecked: boolean = false;
 
   formGroup: FormGroup = new FormGroup({
     title: new FormControl('', Validators.required),
@@ -31,7 +38,6 @@ export class Itinerary implements OnInit {
 
   constructor(
     private itineraryService: ItineraryService,
-    private tripService: TripService,
     private route: ActivatedRoute
   ) {}
 
@@ -46,7 +52,45 @@ export class Itinerary implements OnInit {
 
     this.tripId = parsedId;
     this.userId = this.authService.getUserId();
+
+    this.loadTripAccess();
     this.loadItinerary();
+  }
+
+  private loadTripAccess(): void {
+    this.tripService.getTrips().subscribe({
+      next: (trips: TripDto[]) => {
+        const trip = trips.find(t => t.id === this.tripId);
+        if (trip) {
+          this.isOwner = trip.userId === this.userId;
+          this.hasEditAccess = (trip as any).accessLevel === 'Edit';
+        } else {
+          this.isOwner = false;
+          this.hasEditAccess = false;
+        }
+        this.accessChecked = true;
+      },
+      error: (err: any) => {
+        console.error('Failed to load trips for access check', err);
+        this.isOwner = false;
+        this.hasEditAccess = false;
+        this.accessChecked = true;
+      }
+    });
+  }
+
+  private canEdit(): boolean {
+    if (!this.accessChecked) {
+      this.showToast('Checking permissions — please wait.');
+      return false;
+    }
+
+    if (this.isOwner || this.hasEditAccess) {
+      return true;
+    }
+
+    this.showToast('You do not have permission to modify this itinerary.');
+    return false;
   }
 
   loadItinerary(): void {
@@ -66,6 +110,7 @@ export class Itinerary implements OnInit {
       this.showToast('Please complete the form.');
       return;
     }
+    if (!this.canEdit()) return;
 
     const { title, description, scheduledDateTime } = this.formGroup.value;
     const isoDate = new Date(scheduledDateTime).toISOString();
@@ -110,6 +155,7 @@ export class Itinerary implements OnInit {
       console.error('Missing ID on itinerary item.');
       return;
     }
+    if (!this.canEdit()) return;
 
     this.itineraryService.deleteItineraryItem(this.tripId, this.userId, item.id).subscribe({
       next: () => {
@@ -124,6 +170,8 @@ export class Itinerary implements OnInit {
   }
 
   editItineraryItem(item: ItineraryItemCreateDto): void {
+    if (!this.canEdit()) return;
+
     this.formGroup.setValue({
       title: item.title,
       description: item.description || '',
@@ -137,7 +185,7 @@ export class Itinerary implements OnInit {
     this.editingItemId = undefined;
   }
 
-  showToast(message: string): void {
+  private showToast(message: string): void {
     const toastRef: ComponentRef<Popup> = this.toastContainer.createComponent(Popup);
     toastRef.instance.message = message;
   }

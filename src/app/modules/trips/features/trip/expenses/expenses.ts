@@ -1,10 +1,18 @@
-import { Component, inject, OnInit, ViewChild, ViewContainerRef, ComponentRef } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  ViewChild,
+  ViewContainerRef,
+  ComponentRef
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { TripService } from '../../../../../common/services/trip.service';
 import { ExpenseService } from '../../../../../common/services/expense.service';
 import { AuthService } from '../../../../../common/services/auth.service';
 import { Popup } from '../../../../../common/components/popup/popup';
+import { TripDto } from '../../../../../common/DTOs/Trip/TripDto'; // adjust if path differs
 
 @Component({
   standalone: false,
@@ -23,12 +31,17 @@ export class Expenses implements OnInit {
   total: number = 0;
   editingExpense: any = null;
 
+  // Access control
+  isOwner: boolean = false;
+  hasEditAccess: boolean = false;
+  accessChecked: boolean = false;
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private tripService: TripService,
     private expenseService: ExpenseService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const tripIdParam = this.route.snapshot.paramMap.get('id');
@@ -38,7 +51,44 @@ export class Expenses implements OnInit {
     this.userId = this.authService.getUserId();
 
     this.initForm();
+    this.loadTripAccess();
     this.loadExpenses();
+  }
+
+  private loadTripAccess(): void {
+    this.tripService.getTrips().subscribe({
+      next: (trips: TripDto[]) => {
+        const trip = trips.find(t => t.id === this.tripId);
+        if (trip) {
+          this.isOwner = trip.userId === this.userId;
+          this.hasEditAccess = (trip as any).accessLevel === 'Edit';
+        } else {
+          this.isOwner = false;
+          this.hasEditAccess = false;
+        }
+        this.accessChecked = true;
+      },
+      error: (err: any) => {
+        console.error('Failed to load trips for access check', err);
+        this.isOwner = false;
+        this.hasEditAccess = false;
+        this.accessChecked = true;
+      }
+    });
+  }
+
+  private canEdit(): boolean {
+    if (!this.accessChecked) {
+      this.showToast('Checking permissions — please wait.');
+      return false;
+    }
+
+    if (this.isOwner || this.hasEditAccess) {
+      return true;
+    }
+
+    this.showToast('You do not have permission to modify expenses.');
+    return false;
   }
 
   initForm() {
@@ -54,7 +104,7 @@ export class Expenses implements OnInit {
     this.expenseService.getExpenses(this.tripId).subscribe({
       next: expenses => {
         this.expenses = expenses;
-        this.total = expenses.reduce((acc, e) => acc + e.amount, 0);
+        this.total = expenses.reduce((acc: number, e: any) => acc + e.amount, 0);
         this.summary = [];
       },
       error: err => console.error('Error loading expenses:', err)
@@ -62,6 +112,10 @@ export class Expenses implements OnInit {
   }
 
   showToast(message: string) {
+    if (!this.toastContainer) {
+      console.warn('toastContainer not ready');
+      return;
+    }
     const toastRef: ComponentRef<Popup> = this.toastContainer.createComponent(Popup);
     toastRef.instance.message = message;
   }
@@ -78,6 +132,7 @@ export class Expenses implements OnInit {
 
   addExpense() {
     if (this.expenseForm.invalid) return;
+    if (!this.canEdit()) return;
 
     const raw = this.expenseForm.value;
     const expense = {
@@ -93,17 +148,24 @@ export class Expenses implements OnInit {
       ? this.expenseService.updateExpense(this.tripId, this.editingExpense.id, expense)
       : this.expenseService.addExpense(this.tripId, expense);
 
-    action.subscribe(result => {
-      if (!result) {
-        this.showToast('Access denied or failed to process the expense.');
-        return;
+    action.subscribe({
+      next: result => {
+        if (!result) {
+          this.showToast('Access denied or failed to process the expense.');
+          return;
+        }
+        this.resetForm();
+        this.loadExpenses();
+      },
+      error: err => {
+        console.error('Error saving expense', err);
+        this.showToast('Failed to save expense. Try again later.');
       }
-      this.resetForm();
-      this.loadExpenses();
     });
   }
 
   editExpense(expense: any) {
+    if (!this.canEdit()) return;
     this.expenseForm.patchValue({
       category: expense.category,
       description: expense.description,
@@ -114,8 +176,13 @@ export class Expenses implements OnInit {
   }
 
   deleteExpense(id: number) {
-    this.expenseService.deleteExpense(this.tripId, id).subscribe(success => {
-      this.loadExpenses();
+    if (!this.canEdit()) return;
+    this.expenseService.deleteExpense(this.tripId, id).subscribe({
+      next: () => this.loadExpenses(),
+      error: err => {
+        console.error('Error deleting expense', err);
+        this.showToast('Failed to delete expense.');
+      }
     });
   }
 }

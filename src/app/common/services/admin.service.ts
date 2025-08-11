@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { AdminUserDto } from '../DTOs/Admin/AdminUserDto';
@@ -9,7 +9,7 @@ import { AdminUserDto } from '../DTOs/Admin/AdminUserDto';
     providedIn: 'root'
 })
 export class AdminService {
-    private baseUrl = 'http://localhost:5276/api/v1/admin';
+    private baseUrl = 'http://localhost:5276/api/v1/Admin';
     users: AdminUserDto[] = [];
 
     constructor(private http: HttpClient) { }
@@ -25,8 +25,10 @@ export class AdminService {
     }
 
 
-    deleteUser(userId: number): Observable<any> {
-        return this.http.delete<any>(`${this.baseUrl}/delete-user/${userId}`).pipe(
+    deleteUser(id: number): Observable<any> {
+        const params = new HttpParams().set('id', id.toString());
+        return this.http.delete<any>(`${this.baseUrl}/delete-user/${id}`,
+            { params }).pipe(
             map(response => response.result),
             catchError(err => {
                 console.error('Delete failed:', err);

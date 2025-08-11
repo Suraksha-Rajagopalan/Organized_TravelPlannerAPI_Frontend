@@ -28,7 +28,7 @@ export class Checklist implements OnInit {
   hasEditAccess: boolean = false;
   accessChecked: boolean = false;
 
-  // Popup control (we will not modify the Popup component)
+  // Popup control 
   popupMessage: string = '';
   popupVisible: boolean = false;
 
@@ -89,8 +89,6 @@ export class Checklist implements OnInit {
   private showPopup(message: string) {
     this.popupMessage = message;
     this.popupVisible = true;
-    // note: Popup component handles its internal `visible` and close UI;
-    // we keep *ngIf here to create/destroy the popup component as needed
   }
 
   private canEdit(): boolean {
@@ -154,6 +152,7 @@ export class Checklist implements OnInit {
     this.checklistService.deleteChecklistItem(item.id).subscribe({
       next: () => {
         this.checklist = this.checklist.filter(i => i.id !== item.id);
+        this.showPopup('Item Deleted Successfully!');
       },
       error: (err: any) => {
         console.error('deleteItem failed', err);

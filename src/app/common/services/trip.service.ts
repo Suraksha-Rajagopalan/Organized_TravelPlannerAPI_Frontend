@@ -183,11 +183,16 @@ export class TripService {
 
   getPaginatedTrips(
     pageNumber: number,
-    pageSize: number = 3
+    pageSize: number
   ): Observable<PaginationParamsDto<TripDto>> {
-    return this.http.get<PaginationParamsDto<TripDto>>(
-      `${this.baseUrl}/Trip/page?pageNumber=${pageNumber}&pageSize=${pageSize}`
-    );
+    const params = new HttpParams()
+      .set('PageNumber', pageNumber.toString())
+      .set('PageSize', pageSize.toString());
+
+    return this.http.get<any>(`${this.baseUrl}/Trip/page`, { params })
+      .pipe(
+        map(res => res.result as PaginationParamsDto<TripDto>) 
+      );
   }
 
   // Local Sample & MyTrips Methods

@@ -4,40 +4,60 @@
     <!-- Main Content -->
     <div class="container my-4">
       <!-- My Trips -->
-      <h2 class="text-secondary fw-bold mb-3">My Trips</h2>
 
-      <div *ngIf="loading" class="text-center my-3">
-        <div class="spinner-border" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
-
-      <div *ngIf="!loading && errorMessage" class="alert alert-danger">
-        {{ errorMessage }}
-      </div>
-
-      <div *ngIf="!loading && !errorMessage && trips.length === 0" class="alert alert-info">
-        No trips added yet.
-      </div>
-
+      <!-- My Trips -->
       <div *ngIf="!loading && !errorMessage && trips.length > 0" class="my-4">
-        <app-trip-list [trips]="trips" (tripSelected)="myTripSelected($event)"></app-trip-list>
+        <app-trip-list
+          [trips]="trips"
+          (tripSelected)="myTripSelected($event)"
+        ></app-trip-list>
+
+        <!-- Pagination -->
+        <nav class="mt-3">
+          <ul class="pagination justify-content-center">
+            <li class="page-item" [class.disabled]="pageNumber === 1">
+              <button
+                class="page-link"
+                (click)="onMyTripsPageChange(pageNumber - 1)"
+              >
+                Previous
+              </button>
+            </li>
+            <li class="page-item disabled">
+              <span class="page-link">{{ pageNumber }} / {{ totalPages }}</span>
+            </li>
+            <li class="page-item" [class.disabled]="pageNumber === totalPages">
+              <button
+                class="page-link"
+                (click)="onMyTripsPageChange(pageNumber + 1)"
+              >
+                Next
+              </button>
+            </li>
+          </ul>
+        </nav>
       </div>
 
       <!-- Shared Trips Section -->
-      <h2 class="text-secondary fw-bold mt-5">Trips Shared With Me</h2>
+      <!-- <h2 class="text-secondary fw-bold mt-5">Trips Shared With Me</h2>
 
       <div *ngIf="sharedTrips.length === 0" class="alert alert-info">
         No trips have been shared with you.
       </div>
 
       <div *ngIf="sharedTrips.length > 0" class="my-4">
-        <app-trip-list [trips]="sharedTrips" (tripSelected)="myTripSelected($event)"></app-trip-list>
-      </div>
+        <app-trip-list
+          [trips]="sharedTrips"
+          (tripSelected)="myTripSelected($event)"
+        ></app-trip-list>
+      </div> -->
 
       <!-- Suggested Trips Carousel -->
       <div class="my-5">
-        <app-sample-trips (tripSelected)="onTripSelected($event)"></app-sample-trips>
+        <app-sample-trips
+          (tripSelected)="onTripSelected($event)"
+        ></app-sample-trips>
       </div>
     </div>
   </div>
+</div>

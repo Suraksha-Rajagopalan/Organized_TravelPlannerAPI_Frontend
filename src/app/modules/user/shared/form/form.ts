@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, ViewChild, ViewContainerRef, ComponentRef } from '@angular/core';
 import { TripDto } from '../../../../common/DTOs/Trip/TripDto';
 import { TripService } from '../../../../common/services/trip.service';
 import { FormsModule } from '@angular/forms';
@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../../common/services/auth.service';
 import { Router } from '@angular/router';
 import { TripCreateDto } from '../../../../common/DTOs/Trip/TripCreateDto';
+import { Popup } from '../../../../common/components/popup/popup';
 
 
 @Component({
@@ -15,6 +16,7 @@ import { TripCreateDto } from '../../../../common/DTOs/Trip/TripCreateDto';
 })
 export class Form {
   @Output() tripAdded = new EventEmitter<TripDto>();
+  @ViewChild('toastContainer', { read: ViewContainerRef }) toastContainer!: ViewContainerRef;
   
   trip: TripCreateDto = {
     title: '',
@@ -28,7 +30,7 @@ export class Form {
     description: '',
     image: '',
     notes: '',
-    userId: 0, 
+    userId: 0,
     budgetDetails: {
       food: 0,
       hotel: 0,
@@ -37,9 +39,9 @@ export class Form {
     touristSpots: [] as string[],
   };
 
-  constructor(private tripService: TripService, 
-    private authService: AuthService, 
-    private router: Router) {}
+  constructor(private tripService: TripService,
+    private authService: AuthService,
+    private router: Router) { }
 
   addEssential() {
     this.trip.essentials.push('');
@@ -91,11 +93,21 @@ export class Form {
           essentials: [''],
           touristSpots: [''],
         };
-        this.router.navigate(['/dashboard']);
+        this.showToast('Trip Created Navigating to dashboard.....');
+        this.router.navigate(['/user/dashboard']);
       },
       error: (err) => {
+        this.showToast('Error creating trip');
         console.error('Error creating trip:', err);
       },
     });
+  }
+  showToast(message: string) {
+    if (!this.toastContainer) {
+      console.warn('toastContainer not ready');
+      return;
+    }
+    const toastRef: ComponentRef<Popup> = this.toastContainer.createComponent(Popup);
+    toastRef.instance.message = message;
   }
 }

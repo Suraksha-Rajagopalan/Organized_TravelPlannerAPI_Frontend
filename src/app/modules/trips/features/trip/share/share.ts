@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewContainerRef, ComponentRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TripService } from '../../../../../common/services/trip.service';
 import { ShareService } from '../../../../../common/services/share.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Popup } from '../../../../../common/components/popup/popup';
 
 @Component({
   selector: 'app-trip-share',
@@ -12,6 +13,9 @@ import { CommonModule } from '@angular/common';
   standalone: false
 })
 export class Share implements OnInit {
+  @ViewChild('toastContainer', { read: ViewContainerRef }) toastContainer!: ViewContainerRef;
+
+
   shareForm!: FormGroup;
   tripId!: number;
   submitting = false;
@@ -22,14 +26,14 @@ export class Share implements OnInit {
     private tripService: TripService,
     private router: Router,
     private shareService: ShareService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const tripIdParam = this.route.snapshot.paramMap.get('id');
     if (tripIdParam) {
       this.tripId = +tripIdParam;
     } else {
-      alert('Trip ID not found.');
+      this.showToast('Cannot Share the Trip');
       this.router.navigate(['/user/dashboard']);
       return;
     }
@@ -47,14 +51,23 @@ export class Share implements OnInit {
 
       this.shareService.shareTrip(this.shareForm.value).subscribe({
         next: () => {
-          alert('Trip shared successfully!');
+          this.showToast('Trip Shared Successfully!');
           this.router.navigate(['/user/dashboard']);
         },
         error: err => {
-          alert(err.error || 'Failed to share trip.');
+          this.showToast('Cannot Share the Trip');
           this.submitting = false;
         }
       });
     }
+  }
+
+  showToast(message: string) {
+    if (!this.toastContainer) {
+      console.warn('toastContainer not ready');
+      return;
+    }
+    const toastRef: ComponentRef<Popup> = this.toastContainer.createComponent(Popup);
+    toastRef.instance.message = message;
   }
 }
