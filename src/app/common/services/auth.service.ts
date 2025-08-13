@@ -7,14 +7,18 @@ import { LoginRequestDto } from '../DTOs/Auth/LoginRequestDto';
 import { AuthResponseDto } from '../DTOs/Auth/AuthResponseDto';
 import { SignupRequest } from '../DTOs/Auth/SignupRequest';
 import { TokenRefreshRequestDto } from '../DTOs/Auth/TokenRefreshRequestDto';
+import { ApiResponse, LoginResponseDto } from '../DTOs/Auth/LoginResponseDto';
+import { SignupResponseDto } from '../DTOs/Auth/SignupResponseDto';
+import { environment } from '../../../environments/environment.development';
+import { UpdateProfileDto } from '../DTOs/Auth/UpdateProfileDto';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:5276/api/v1/Auth';
   private userSubject: BehaviorSubject<any>;
   public user$: Observable<any>;
+  private apiUrl = `${environment.apiUrl}`;
 
   constructor(private http: HttpClient, private cookieService: CookieService) {
     const storedUser = this.getUserFromCookies();
@@ -22,22 +26,29 @@ export class AuthService {
     this.user$ = this.userSubject.asObservable();
   }
 
-  login(email: string, password: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/login`, { email, password }).pipe(
-      map(response => response.result),
-      catchError(error => {
-        console.error('Login failed:', error);
-        return throwError(() => new Error('Login failed. Please check your credentials.'));
-      })
-    );
+  login(email: string, password: string): Observable<LoginResponseDto> {
+  return this.http.post<ApiResponse<LoginResponseDto>>(
+    `${this.apiUrl}/Auth/login`,
+    { email, password }
+  ).pipe(
+    map(response => response.result), // Extract result only
+    catchError(error => {
+      console.error('Login failed:', error);
+      return throwError(() => new Error('Login failed. Please check your credentials.'));
+    })
+  );
+}
+
+updateProfile(payload: UpdateProfileDto): Observable<any> {
+    return this.http.put(`${this.apiUrl}/Auth/update-profile`, payload);
   }
 
-  signup(Name: string, Email: string, Password: string): Observable<any> {
+
+  signup(Name: string, Email: string, Password: string): Observable<SignupResponseDto> {
     const body = { Name, Email, Password };
-    return this.http.post<any>(`${this.apiUrl}/signup`, body, {
+    return this.http.post<SignupResponseDto>(`${this.apiUrl}/Auth/signup`, body, {
       headers: new HttpHeaders({ 'Content-Type': 'application/json' })
     }).pipe(
-      map(response => response.result),
       catchError(error => {
         console.log(Name, Email, Password);
         console.error('Signup failed:', error);
@@ -47,22 +58,19 @@ export class AuthService {
   }
 
 
-  refreshToken(): Observable<any> {
+  refreshToken(): Observable<LoginResponseDto> {
     const accessToken = this.cookieService.get('jwtToken');
-
     const refreshDto: TokenRefreshRequestDto = {
       accessToken,
-      refreshToken: '' // Just send empty or omit it, backend uses cookie anyway
+      refreshToken: ''
     };
 
-    return this.http.post<any>(`${this.apiUrl}/refresh`, refreshDto, {
-      withCredentials: true // Important: allows cookies to be sent with request
+    return this.http.post<LoginResponseDto>(`${this.apiUrl}/Auth/refresh`, refreshDto, {
+      withCredentials: true
     }).pipe(
       map(response => {
-        const { user, accessToken, refreshToken } = response;
-
-        this.setUser(user, accessToken, refreshToken); // Store updated tokens
-        return user;
+        this.setUser(response.user, response.accessToken, response.refreshToken);
+        return response;
       }),
       catchError(error => {
         console.error('Token refresh failed:', error);

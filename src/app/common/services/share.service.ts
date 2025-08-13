@@ -6,6 +6,7 @@ import { of } from 'rxjs';
 import { AuthService } from './auth.service';
 import { TripShareRequestDto } from '../DTOs/TripShare/TripShareRequestDto';
 import { TripDto } from '../DTOs/Trip/TripDto';
+import { environment } from '../../../environments/environment.development';
 
 
 
@@ -13,7 +14,7 @@ import { TripDto } from '../DTOs/Trip/TripDto';
     providedIn: 'root'
 })
 export class ShareService {
-    private baseUrl = 'http://localhost:5276/api/v1';
+    private baseUrl = `${environment.apiUrl}`;
 
     constructor(private http: HttpClient, private authService: AuthService) { }
 

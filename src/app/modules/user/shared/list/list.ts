@@ -51,27 +51,28 @@ export class List implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['trips'] && this.trips?.length) {
-      // Normalize ID so shared trips also have `id`
       this.displayedTrips = this.trips.map(trip => {
         const normalizedId =
-          (trip as any).id ??
-          (trip as any).tripId ??
-          (trip as any).TripId ??
-          null;
+          trip.id ?? (trip as any).tripId ?? (trip as any).TripId ?? null;
+
+        const r = trip.review;
+        const hasRating = r && typeof r.rating === 'number' && !isNaN(r.rating);
+        const hasText = r && typeof r.review === 'string' && r.review.trim().length > 0;
+
         return {
           ...trip,
           id: normalizedId,
-          isOwner: trip.userId === this.userId
-        } as TripWithOwnership;
+          isOwner: trip.userId === this.userId,
+          review: r && (hasRating || hasText) ? r : null
+        };
       });
 
-      console.debug('Normalized displayedTrips:', this.displayedTrips);
-
-      this.loadReviewsForTrips();
+      console.debug('displayedTrips with normalized reviews:', this.displayedTrips);
     } else if (changes['trips']) {
       this.displayedTrips = [];
     }
   }
+
 
   emitTripId(trip: TripWithOwnership) {
     if (trip?.id != null) {
@@ -79,38 +80,38 @@ export class List implements OnChanges {
     }
   }
 
-  private loadReviewsForTrips(): Observable<TripDto[]> {
-    return this.tripService.getTrips().pipe(
-      map(trips =>
-        trips.map(trip => {
-          // Normalize review: if there's no useful data, set to null
-          const r: ReviewDto | null | undefined = trip.review;
+  // private loadReviewsForTrips(): Observable<TripDto[]> {
+  //   return this.tripService.getTrips().pipe(
+  //     map(trips =>
+  //       trips.map(trip => {
+  //         // Normalize review: if there's no useful data, set to null
+  //         const r: ReviewDto | null | undefined = trip.review;
 
-          if (!r) {
-            trip.review = null;
-            return trip;
-          }
+  //         if (!r) {
+  //           trip.review = null;
+  //           return trip;
+  //         }
 
-          // If review object exists but has neither rating nor text, treat as null
-          const hasRating = typeof r.rating === 'number' && !isNaN(r.rating);
-          const hasText = typeof r.review === 'string' && r.review.trim().length > 0;
+  //         // If review object exists but has neither rating nor text, treat as null
+  //         const hasRating = typeof r.rating === 'number' && !isNaN(r.rating);
+  //         const hasText = typeof r.review === 'string' && r.review.trim().length > 0;
 
-          trip.review = (hasRating || hasText) ? r : null;
-          return trip;
-        })
-      ),
-      tap(trips => {
-        // update local view-model so template can bind
-        this.displayedTrips = trips;
-      }),
-      catchError(err => {
-        console.error('loadReviewsForTrips failed:', err);
-        // on error, clear displayedTrips and return empty array so subscribers get a value
-        this.displayedTrips = [];
-        return of([] as TripDto[]);
-      })
-    );
-  }
+  //         trip.review = (hasRating || hasText) ? r : null;
+  //         return trip;
+  //       })
+  //     ),
+  //     tap(trips => {
+  //       // update local view-model so template can bind
+  //       this.displayedTrips = trips;
+  //     }),
+  //     catchError(err => {
+  //       console.error('loadReviewsForTrips failed:', err);
+  //       // on error, clear displayedTrips and return empty array so subscribers get a value
+  //       this.displayedTrips = [];
+  //       return of([] as TripDto[]);
+  //     })
+  //   );
+  // }
 
   selectViewTrip(tripId: number | null): void {
     if (tripId == null) {

@@ -5,6 +5,7 @@ import { map, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { AuthService } from './auth.service';
 import { TripReviewDto } from '../DTOs/TripReviews/TripReviewDto';
+import { environment } from '../../../environments/environment.development';
 
 
 
@@ -12,7 +13,7 @@ import { TripReviewDto } from '../DTOs/TripReviews/TripReviewDto';
     providedIn: 'root'
 })
 export class ReviewsService {
-    private baseUrl = 'http://localhost:5276/api/v1';
+    private baseUrl = `${environment.apiUrl}`;
 
     constructor(private http: HttpClient, private authService: AuthService) { }
 

@@ -55,7 +55,7 @@ export class Signup implements OnInit {
       error: (err) => {
         console.error('Signup error:', err);
         this.isError = true;
-        this.message = 'Signup failed: ' + (err.error?.message || 'Unknown error');
+        this.message = 'Signup failed: ' + (err.error?.message || 'User Exists');
       }
     });
   }

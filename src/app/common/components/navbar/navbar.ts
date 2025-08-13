@@ -48,7 +48,7 @@ export class Navbar implements OnInit {
   }
 
   goToHome(): void {
-    this.router.navigate(['/users/dashboard']);
+    this.router.navigate(['/user/dashboard']);
   }
 
   goToAdmin(): void {

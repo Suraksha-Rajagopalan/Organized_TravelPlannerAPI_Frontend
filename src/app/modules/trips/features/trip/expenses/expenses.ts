@@ -105,7 +105,19 @@ export class Expenses implements OnInit {
       next: expenses => {
         this.expenses = expenses;
         this.total = expenses.reduce((acc: number, e: any) => acc + e.amount, 0);
-        this.summary = [];
+        // Group by category for summary
+        const categoryMap: { [key: string]: number } = {};
+        for (const e of expenses) {
+          if (!categoryMap[e.category]) {
+            categoryMap[e.category] = 0;
+          }
+          categoryMap[e.category] += e.amount;
+        }
+
+        this.summary = Object.entries(categoryMap).map(([category, total]) => ({
+          category,
+          total
+        }));
       },
       error: err => console.error('Error loading expenses:', err)
     });

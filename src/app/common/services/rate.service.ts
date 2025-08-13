@@ -5,13 +5,14 @@ import { map, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { AuthService } from './auth.service';
 import { ReviewDto } from '../DTOs/Reviews/ReviewDto';
+import { environment } from '../../../environments/environment.development';
 
 
 @Injectable({
     providedIn: 'root'
 })
 export class RateService {
-    private baseUrl = 'http://localhost:5276/api/v1';
+    private baseUrl = `${environment.apiUrl}`;
 
     constructor(private http: HttpClient, private authService: AuthService) { }
 

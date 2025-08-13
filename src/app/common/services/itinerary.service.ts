@@ -5,12 +5,13 @@ import { map, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { AuthService } from './auth.service';
 import { ItineraryItemCreateDto } from '../DTOs/Itinerary/ItineraryItemCreateDto';
+import { environment } from '../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ItineraryService {
-  private baseUrl = 'http://localhost:5276/api/v1';
+  private baseUrl = `${environment.apiUrl}`;
 
   constructor(private http: HttpClient, private authService: AuthService) { }
   // ─── Itinerary ───────────────────────────────────────────────────────────

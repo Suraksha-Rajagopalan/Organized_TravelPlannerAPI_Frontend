@@ -12,6 +12,7 @@ import { ItineraryItemCreateDto } from '../DTOs/Itinerary/ItineraryItemCreateDto
 import { ExpenseDto } from '../DTOs/Expense/ExpenseDto';
 import { TripShareRequestDto } from '../DTOs/TripShare/TripShareRequestDto';
 import { PaginationParamsDto } from '../DTOs/Trip/PaginationParamsDto';
+import { environment } from '../../../environments/environment.development';
 
 
 
@@ -19,7 +20,7 @@ import { PaginationParamsDto } from '../DTOs/Trip/PaginationParamsDto';
   providedIn: 'root'
 })
 export class TripService {
-  private baseUrl = 'http://localhost:5276/api/v1';
+  private baseUrl = `${environment.apiUrl}`;
 
   sampleTrips: TripDto[] = [
     {

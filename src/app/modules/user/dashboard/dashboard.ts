@@ -73,8 +73,6 @@ export class Dashboard implements OnInit, OnDestroy {
       });
   }
 
-
-
   // For pagination buttons
   onMyTripsPageChange(page: number) {
     if (page >= 1 && page <= this.totalPages) {
