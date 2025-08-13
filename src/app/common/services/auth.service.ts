@@ -81,7 +81,7 @@ updateProfile(payload: UpdateProfileDto): Observable<any> {
 
 
   getAccessToken(): string | null {
-    return this.cookieService.get('jwtToken') || null;
+    return localStorage.getItem('jwtToken') || null;
   }
 
   logout(): void {
@@ -102,23 +102,23 @@ updateProfile(payload: UpdateProfileDto): Observable<any> {
 
   setUser(user: any, token: string, refreshToken: string): void {
     const expires = 7; // 7 days
-    this.cookieService.set('jwtToken', token, expires, '/');
-    this.cookieService.set('refreshToken', refreshToken, expires, '/');
-    this.cookieService.set('user', JSON.stringify(user), expires, '/');
+    localStorage.setItem('jwtToken', token);
+    localStorage.setItem('refreshToken', refreshToken);
+    localStorage.setItem('user', JSON.stringify(user));
     this.userSubject.next(user);
   }
 
   isLoggedIn(): boolean {
-    return !!this.cookieService.get('jwtToken');
+    return !!localStorage.getItem('jwtToken');
   }
 
-  getJwtToken(): string {
-    return this.cookieService.get('jwtToken');
+  getJwtToken(): string | null {
+    return localStorage.getItem('jwtToken');
   }
 
   private getUserFromCookies(): any {
     try {
-      const userJson = this.cookieService.get('user');
+      const userJson = localStorage.getItem('user');
       return userJson ? JSON.parse(userJson) : null;
     } catch (e) {
       console.warn('Failed to parse user from cookies:', e);

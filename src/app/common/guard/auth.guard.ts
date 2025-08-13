@@ -5,7 +5,7 @@ import { CookieService } from 'ngx-cookie-service';
 export const authGuard: CanActivateFn = () => {
   const cookieService = inject(CookieService);
   const router = inject(Router);
-  const token = cookieService.get('jwtToken');
+  const token = localStorage.getItem('jwtToken');
 
   if (token) {
     return true;

@@ -1,69 +1,92 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpEvent } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
-import { CookieService } from 'ngx-cookie-service';
-import { catchError, switchMap } from 'rxjs/operators';
-import { throwError, of } from 'rxjs';
+import { Observable, BehaviorSubject, throwError } from 'rxjs';
+import { catchError, switchMap, filter, take } from 'rxjs/operators';
 
-export const authInterceptor: HttpInterceptorFn = (req, next) => {
+let refreshInProgress = false;
+const refreshSubject = new BehaviorSubject<string | null>(null);
+
+export const authInterceptor: HttpInterceptorFn = (
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn
+): Observable<HttpEvent<unknown>> => {
   const authService = inject(AuthService);
-  const cookieService = inject(CookieService);
 
   const token = authService.getJwtToken();
   const excludedUrls = ['/signup', '/login', '/refresh'];
   const shouldExclude = excludedUrls.some(url => req.url.includes(url));
 
-  const jwtExpiryStr = cookieService.get('jwtTokenExpiry');
+  // Read expiry directly from localStorage (set during login/refresh)
+  const jwtExpiryStr = localStorage.getItem('accessExpiry');
   const jwtExpiry = jwtExpiryStr ? parseInt(jwtExpiryStr, 10) : null;
   const now = Date.now();
 
-  // Helper: clone with Authorization header
-  const addAuthHeader = (request: typeof req, tokenValue: string) =>
+  const addAuthHeader = (request: HttpRequest<unknown>, tokenValue: string) =>
     request.clone({
-      setHeaders: { Authorization: `Bearer ${tokenValue}` },
-      withCredentials: true
+      setHeaders: { Authorization: `Bearer ${tokenValue}` }
     });
 
-  // If excluded (like login/signup), just pass request through
   if (shouldExclude) {
-    return next(req.clone({ withCredentials: true }));
+    return next(req);
   }
 
-  // If no token at all, proceed without header
+  // If no token, just forward the request without Authorization
   if (!token) {
     return next(req);
   }
 
-  // If token expiry is within 1 minute, refresh before proceeding
+  // If token is expiring in <= 1 min, refresh before proceeding
   if (jwtExpiry && jwtExpiry - now <= 60_000) {
-    return authService.refreshToken().pipe(
-      switchMap(refreshed => {
-        const newToken = authService.getJwtToken();
-        return next(addAuthHeader(req, newToken));
-      }),
-      catchError(err => {
-        authService.logout();
-        return throwError(() => new Error('Session expired. Please log in again.'));
-      })
-    );
+    return performRefresh(authService, req, next, addAuthHeader);
   }
 
-  // Otherwise, attach token and send request
+  // Otherwise, attach token normally
   return next(addAuthHeader(req, token)).pipe(
     catchError(error => {
-      if (error.status === 401) {
-        return authService.refreshToken().pipe(
-          switchMap(() => {
-            const refreshedToken = authService.getJwtToken();
-            return next(addAuthHeader(req, refreshedToken));
-          }),
-          catchError(() => {
-            authService.logout();
-            return throwError(() => new Error('Session expired. Please log in again.'));
-          })
-        );
+      if ((error as any)?.status === 401) {
+        return performRefresh(authService, req, next, addAuthHeader);
       }
       return throwError(() => error);
     })
   );
 };
+
+function performRefresh(
+  authService: AuthService,
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn,
+  addAuthHeader: (r: HttpRequest<unknown>, token: string) => HttpRequest<unknown>
+): Observable<HttpEvent<unknown>> {
+  if (!refreshInProgress) {
+    refreshInProgress = true;
+    refreshSubject.next(null);
+
+    return authService.refreshToken().pipe(
+      switchMap(response => {
+        refreshInProgress = false;
+        const newToken = response.accessToken;
+        refreshSubject.next(newToken ?? null);
+
+        if (!newToken) {
+          authService.logout();
+          return throwError(() => new Error('Refresh failed, no token returned'));
+        }
+        return next(addAuthHeader(req, newToken));
+      }),
+      catchError(err => {
+        refreshInProgress = false;
+        refreshSubject.next(null);
+        authService.logout();
+        return throwError(() => err);
+      })
+    );
+  } else {
+    // Wait for the ongoing refresh to complete
+    return refreshSubject.pipe(
+      filter((t): t is string => typeof t === 'string' && t.length > 0),
+      take(1),
+      switchMap(newToken => next(addAuthHeader(req, newToken)))
+    );
+  }
+}
